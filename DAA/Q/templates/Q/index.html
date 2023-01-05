@@ -111,223 +111,14 @@
     </form>
   </body>
   <script>
-   const formObj = [
-     {
-       name: "Q-1",
-       question_text: "Can you tell us about your sleep over the last few weeks?",
-       fields: [
-         {
-           value: 1,
-           choice_text: "I've been sleeping more than usual"
-         },
-         {
-           value: 2,
-           choice_text: "I've been sleeping less than usual"
-         },
-         {
-           value: 3,
-           choice_text: "I've haven't noticed any changes"
-         }
-       ]
-     },
-     {
-       name: "Q-2",
-       question_text: "How has your appetite been over the last few weeks?",
-       fields: [
-         {
-           value: 1,
-           choice_text: "I have a larger apetite than usual"
-         },
-         {
-           value: 2,
-           choice_text: "I have a smaller appetite than usual"
-         },
-         {
-           value: 3,
-           choice_text: "I've haven't noticed any changes"
-         }
-       ]
-     },
-     {
-       name: "Q-3",
-       question_text: "Have you been less active than usual?",
-       fields: [
-         {
-           value: 1,
-           choice_text: "Not really"
-         },
-         {
-           value: 2,
-           choice_text: "Maybe a litle"
-         },
-         {
-           value: 3,
-           choice_text: "Somewhat"
-         },
-         {
-           value: 4,
-           choice_text: "Quite a bit"
-         }
-       ]
-     },
-     {
-       name: "Q-4",
-       question_text: "I'm not interested in doing things I used to enjoy before?",
-       fields: [
-         {
-           value: 1,
-           choice_text: "Strongly disagree"
-         },
-         {
-           value: 2,
-           choice_text: "Disagree"
-         },
-         {
-           value: 3,
-           choice_text: "Neutral"
-         },
-         {
-           value: 4,
-           choice_text: "Agree"
-         }
-       ]
-     },
-     {
-       name: "Q-5",
-       question_text: "I feel tired and it takes me a lot of effort to do even the smallest of things",
-       fields: [
-         {
-           value: 1,
-           choice_text: "Completely untrue"
-         },
-         {
-           value: 2,
-           choice_text: "Somewhat untrue"
-         },
-         {
-           value: 3,
-           choice_text: "I am unsure"
-         },
-         {
-           value: 4,
-           choice_text: "Somewhat true"
-         }
-       ]
-     },
-     {
-       name: "Q-6",
-       question_text: "I find it hard to concentrate on activites, like reading or watching TV",
-       fields: [
-         {
-           value: 1,
-           choice_text: "Not at all"
-         },
-         {
-           value: 2,
-           choice_text: "Hardly ever"
-         },
-         {
-           value: 3,
-           choice_text: "Maybe sometimes"
-         },
-         {
-           value: 4,
-           choice_text: "Most of the time"
-         }
-       ]
-     },
-     {
-       name: "Q-7",
-       question_text: "I feel that I'm not good enough",
-       fields: [
-         {
-           value: 1,
-           choice_text: "Strongly disagree"
-         },
-         {
-           value: 2,
-           choice_text: "Disagree"
-         },
-         {
-           value: 3,
-           choice_text: "Neutral"
-         },
-         {
-           value: 4,
-           choice_text: "Agree"
-         }
-       ]
-     },
-     {
-       name: "Q-8",
-       question_text: "I tend to have some negative perspective of things",
-       fields: [
-         {
-           value: 1,
-           choice_text: "Completely untrue"
-         },
-         {
-           value: 2,
-           choice_text: "Somewhat untrue"
-         },
-         {
-           value: 3,
-           choice_text: "I am unsure"
-         },
-         {
-           value: 4,
-           choice_text: "Somewhat true"
-         }
-       ]
-     },
-     {
-       name: "Q-9",
-       question_text: "I feel nervous or anxious",
-       fields: [
-         {
-           value: 1,
-           choice_text: "Never"
-         },
-         {
-           value: 2,
-           choice_text: "Not very often"
-         },
-         {
-           value: 3,
-           choice_text: "Maybe, sometimes"
-         },
-         {
-           value: 4,
-           choice_text: "A lot of the time"
-         }
-       ]
-     },
-     {
-       name: "Q-10",
-       question_text: "Do you think depression hinders your ability to work, be with people, or take care of yourself?",
-       fields: [
-         {
-           value: 1,
-           choice_text: "No, Never"
-         },
-         {
-           value: 2,
-           choice_text: "Rarely"
-         },
-         {
-           value: 3,
-           choice_text: "Yes, sometimes"
-         },
-         {
-           value: 4,
-           choice_text: "Yes, often"
-         }
-       ]
-     },
-   ];
+   var formObj = JSON.parse("{{data|escapejs}}");
+   formObj.forEach((question, i) => {
+      question.fields = JSON.parse(question.fields);
+   });
 
   let active = 0;
   const numberOfQuestons = formObj.length;
+  let patientScore = 0;
 
   const stepsContainer = document.querySelector("[data-steps]");
   const userForm = document.querySelector("#userForm");
@@ -363,12 +154,24 @@
            button.setAttribute(key, value);
          }
         button.classList.add("btn");
-         button.addEventListener("click", (e) => inputHandler(e, form.question_text, button.value)); 
+         button.addEventListener("click", (e) => inputHandler(e, form.question_text, button.value, input.score)); 
          buttonContainer.appendChild(button)
        });
       fragment.appendChild(parent);
      });
+
+     const result = document.createElement("div");
+     result.classList.add("single-form");
+     result.innerText = "Assessment Results:"; 
+
+     resValue = document.createElement("div");
+     resValue.classList.add("result");
+     resValue.innerText = patientScore;
+
+     result.appendChild(resValue);
+     fragment.appendChild(result);
      userForm.append(fragment);
+
      toggleForm();
    }
 
@@ -379,12 +182,26 @@
      toggleForm();
    }
 
-   function inputHandler(e, question, value) {
+   function inputHandler(e, question, value, score) {
      e.preventDefault();
+     patientScore += parseInt(score);
      if (active < 10) {
        active +=1;
      }
+     resultUpdate();
      setActiveStep();
+   }
+
+   function resultUpdate() {
+     resDiv = document.querySelector(".result");
+          if (patientScore > 7) {
+            text = "Your test score is: " + patientScore + "\nYou are healthy!";
+          } else if (patientScore > 0) {
+            text = "Your test score is: " + patientScore + "\nMedication is recommended.";
+          } else {
+            text = "Your test score is: " + patientScore + "\nYou require medication.";
+          }
+     resDiv.innerText = text;
    }
 
    function toggleForm() {
