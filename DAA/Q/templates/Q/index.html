@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+      *,*::before,*::after{
+        box-sizing:border-box;
+      }
+      
+      [data-steps]{
+        display:flex;
+        counter-reset:step;
+        margin:50px 0px;
+      
+      }
+      
+      .list{
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        list-style:none;
+        width:10%;
+        text-align:center;
+        position:relative;
+      }
+      
+      .list::before{
+        content:counter(step);
+        counter-increment:step;
+        position:absolute;
+        display:block;
+        width:30px;
+        height:30px;
+        background-color:#ff0000;
+        color:#ffffff;
+        border-radius:5px;
+        line-height:30px;
+        top:-35px;
+      }
+      
+      .list:not(:first-child)::after{
+        content:" ";
+        width:100%;
+        height:2px;
+        background-color:#000000;
+        position:absolute;
+        z-index:-1;
+        left:-50%;
+        top:-21px;
+      }
+      
+      .list.active::before,.list:not(:first-child).active::after{
+        background-color:#D7E9B9;
+      }
+
+      .btn-container{
+        display:flex;
+        justify-content:space-around;
+        width:100%;
+        flex-wrap: wrap;
+      }
+      .btn{
+        border-radius:2em;
+        background-color: #FFFFFF;
+        padding:1em;
+        outline:none;
+        color:#000000;
+        cursor:pointer;
+        flex-basis: 100%;
+        align-items: space-around;
+        margin: 1em 1em;
+        transition: padding 0.5s linear;
+      }
+
+      .btn:hover{
+        padding:1.2em;
+      }
+      
+      .btn.disabled{
+        background-color:#333;
+        cursor:no-drop;
+      }
+      
+      .single-form{
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:space-around;
+        position:relative;
+        border:1px solid;
+        border-radius:4px;
+        width:80%;
+        min-height:400px;
+        margin:0 auto;
+        opacity: 1;
+        transition: opacity 1s linear;
+      }
+      
+      .single-form.hide{
+        display:none;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="userForm">
+      <ul data-steps></ul>
+    </form>
+  </body>
+  <script>
+   const formObj = [
+     {
+       name: "Q-1",
+       question_text: "Can you tell us about your sleep over the last few weeks?",
+       fields: [
+         {
+           value: 1,
+           choice_text: "I've been sleeping more than usual"
+         },
+         {
+           value: 2,
+           choice_text: "I've been sleeping less than usual"
+         },
+         {
+           value: 3,
+           choice_text: "I've haven't noticed any changes"
+         }
+       ]
+     },
+     {
+       name: "Q-2",
+       question_text: "How has your appetite been over the last few weeks?",
+       fields: [
+         {
+           value: 1,
+           choice_text: "I have a larger apetite than usual"
+         },
+         {
+           value: 2,
+           choice_text: "I have a smaller appetite than usual"
+         },
+         {
+           value: 3,
+           choice_text: "I've haven't noticed any changes"
+         }
+       ]
+     },
+     {
+       name: "Q-3",
+       question_text: "Have you been less active than usual?",
+       fields: [
+         {
+           value: 1,
+           choice_text: "Not really"
+         },
+         {
+           value: 2,
+           choice_text: "Maybe a litle"
+         },
+         {
+           value: 3,
+           choice_text: "Somewhat"
+         },
+         {
+           value: 4,
+           choice_text: "Quite a bit"
+         }
+       ]
+     },
+     {
+       name: "Q-4",
+       question_text: "I'm not interested in doing things I used to enjoy before?",
+       fields: [
+         {
+           value: 1,
+           choice_text: "Strongly disagree"
+         },
+         {
+           value: 2,
+           choice_text: "Disagree"
+         },
+         {
+           value: 3,
+           choice_text: "Neutral"
+         },
+         {
+           value: 4,
+           choice_text: "Agree"
+         }
+       ]
+     },
+     {
+       name: "Q-5",
+       question_text: "I feel tired and it takes me a lot of effort to do even the smallest of things",
+       fields: [
+         {
+           value: 1,
+           choice_text: "Completely untrue"
+         },
+         {
+           value: 2,
+           choice_text: "Somewhat untrue"
+         },
+         {
+           value: 3,
+           choice_text: "I am unsure"
+         },
+         {
+           value: 4,
+           choice_text: "Somewhat true"
+         }
+       ]
+     },
+     {
+       name: "Q-6",
+       question_text: "I find it hard to concentrate on activites, like reading or watching TV",
+       fields: [
+         {
+           value: 1,
+           choice_text: "Not at all"
+         },
+         {
+           value: 2,
+           choice_text: "Hardly ever"
+         },
+         {
+           value: 3,
+           choice_text: "Maybe sometimes"
+         },
+         {
+           value: 4,
+           choice_text: "Most of the time"
+         }
+       ]
+     },
+     {
+       name: "Q-7",
+       question_text: "I feel that I'm not good enough",
+       fields: [
+         {
+           value: 1,
+           choice_text: "Strongly disagree"
+         },
+         {
+           value: 2,
+           choice_text: "Disagree"
+         },
+         {
+           value: 3,
+           choice_text: "Neutral"
+         },
+         {
+           value: 4,
+           choice_text: "Agree"
+         }
+       ]
+     },
+     {
+       name: "Q-8",
+       question_text: "I tend to have some negative perspective of things",
+       fields: [
+         {
+           value: 1,
+           choice_text: "Completely untrue"
+         },
+         {
+           value: 2,
+           choice_text: "Somewhat untrue"
+         },
+         {
+           value: 3,
+           choice_text: "I am unsure"
+         },
+         {
+           value: 4,
+           choice_text: "Somewhat true"
+         }
+       ]
+     },
+     {
+       name: "Q-9",
+       question_text: "I feel nervous or anxious",
+       fields: [
+         {
+           value: 1,
+           choice_text: "Never"
+         },
+         {
+           value: 2,
+           choice_text: "Not very often"
+         },
+         {
+           value: 3,
+           choice_text: "Maybe, sometimes"
+         },
+         {
+           value: 4,
+           choice_text: "A lot of the time"
+         }
+       ]
+     },
+     {
+       name: "Q-10",
+       question_text: "Do you think depression hinders your ability to work, be with people, or take care of yourself?",
+       fields: [
+         {
+           value: 1,
+           choice_text: "No, Never"
+         },
+         {
+           value: 2,
+           choice_text: "Rarely"
+         },
+         {
+           value: 3,
+           choice_text: "Yes, sometimes"
+         },
+         {
+           value: 4,
+           choice_text: "Yes, often"
+         }
+       ]
+     },
+   ];
+
+  let active = 0;
+  const numberOfQuestons = formObj.length;
+
+  const stepsContainer = document.querySelector("[data-steps]");
+  const userForm = document.querySelector("#userForm");
+
+  createSteps();
+  createMultiForm();
+  
+   function createSteps() {
+     const fragment = document.createDocumentFragment();
+     for (let i=0; i < numberOfQuestons; i++) {
+      const step  = document.createElement("li");
+       step.classList.add(...["list", i <= active ? "active" : "inactive"]);
+       step.innerText = formObj[i].name;
+       fragment.appendChild(step);
+     }
+     stepsContainer.appendChild(fragment);
+   }
+
+   function createMultiForm() {
+     const fragment = document.createDocumentFragment();
+     formObj.forEach((form, i) => {
+        const parent = document.createElement("div");
+        parent.classList.add("single-form");
+        parent.innerText = form.question_text;
+        const buttonContainer = document.createElement("div");
+        buttonContainer.classList.add("btn-container");
+        parent.appendChild(buttonContainer);
+        form.fields.forEach((input) => {
+         var button = document.createElement("BUTTON");
+         var text = document.createTextNode(input.choice_text);
+         button.appendChild(text);
+         for (let [key, value] of Object.entries(input)) {
+           button.setAttribute(key, value);
+         }
+        button.classList.add("btn");
+         button.addEventListener("click", (e) => inputHandler(e, form.question_text, button.value)); 
+         buttonContainer.appendChild(button)
+       });
+      fragment.appendChild(parent);
+     });
+     userForm.append(fragment);
+     toggleForm();
+   }
+
+   function setActiveStep() {
+     document.querySelectorAll(".list").forEach((list, i) => {
+       list.classList.toggle("active", i <= active);
+     });
+     toggleForm();
+   }
+
+   function inputHandler(e, question, value) {
+     e.preventDefault();
+     if (active < 10) {
+       active +=1;
+     }
+     setActiveStep();
+   }
+
+   function toggleForm() {
+     document.querySelectorAll(".single-form").forEach((form, i) => {
+        form.classList.toggle("hide", i !== active);
+     });
+   }
+
+  </script>
+</html>
