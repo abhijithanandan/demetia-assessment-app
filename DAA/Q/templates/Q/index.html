@@ -116,9 +116,14 @@
       question.fields = JSON.parse(question.fields);
    });
 
+   const query_params = new Proxy(new URLSearchParams(window.location.search),{
+     get: (searchParams, prop) => searchParams.get(prop),
+   });
+
   let active = 0;
   const numberOfQuestons = formObj.length;
   let patientScore = 0;
+  let userResponseData = [];
 
   const stepsContainer = document.querySelector("[data-steps]");
   const userForm = document.querySelector("#userForm");
@@ -185,11 +190,31 @@
    function inputHandler(e, question, value, score) {
      e.preventDefault();
      patientScore += parseInt(score);
+     userResponseData.push(value)
      if (active < 10) {
        active +=1;
      }
+    if(active == 9) {
+       updateUserData();
+    }
      resultUpdate();
      setActiveStep();
+   }
+
+   function updateUserData() {
+     let username = query_params.name
+     var csrftoken =  '{{ csrf_token }}';
+     fetch('http://localhost:8000/Q/', {
+       method: 'POST',
+       headers: {
+         'Accept': 'application/json',
+         'Content-Type': 'application/json',
+       },
+       body: JSON.stringify({'username': username, 'data': userResponseData, 'csrfmiddlewaretoken': csrftoken}),
+       credentials: 'same-origin'
+     })
+      .then(response => response.json())
+       .then(response => console.log(JSON.stringify(response)))
    }
 
    function resultUpdate() {
