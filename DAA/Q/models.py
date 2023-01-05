@@ -4,6 +4,11 @@ from django.db import models
 from django.utils import timezone
 
 
+class Userdata(models.Model):
+    username = models.CharField(max_length=200)
+    response_list = models.CharField(max_length=200)
+
+
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
 
