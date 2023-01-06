@@ -1,6 +1,5 @@
 import sys
 import mysql.connector
-import random
 
 mydb = mysql.connector.connect(host="localhost", user="abhi", passwd="abhi", database="daa")
 my_cursor = mydb.cursor()
